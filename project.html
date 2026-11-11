@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Academia-Industry Collaboration Portal</title>
+<style>
+:root{--primary:#2563eb;--primary-hover:#1d4ed8;--secondary:#0f172a;--bg:#f1f5f9;--card-bg:#fff;--text:#334155;--text-dark:#0f172a;--border:#cbd5e1;--danger:#dc2626;--success:#16a34a}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--secondary);color:#fff;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.header-left{display:flex;align-items:center;gap:.75rem}
+.back-btn,.logout-btn{color:#fff;border:none;padding:.4rem .8rem;border-radius:6px;font-size:.85rem;cursor:pointer;font-weight:600;display:none}
+.back-btn{background:#334155}.back-btn:hover{background:#475569}
+.logout-btn{background:#ef4444}
+header h1{font-size:1.15rem}
+.container{flex:1;display:flex;justify-content:center;align-items:center;padding:1.5rem}
+.screen{background:var(--card-bg);width:100%;max-width:580px;padding:2rem;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.08);display:none}
+.screen.active{display:block}
+h2{color:var(--text-dark);text-align:center;margin-bottom:.4rem}
+p.subtitle{color:#64748b;font-size:.9rem;text-align:center;margin-bottom:1.25rem}
+.role-tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;background:#e2e8f0;padding:.35rem;border-radius:8px}
+.role-btn{flex:1;padding:.6rem;border:none;border-radius:6px;font-weight:600;font-size:.9rem;cursor:pointer;background:transparent;color:#64748b}
+.role-btn.active{background:#fff;color:var(--primary)}
+.tab-container{display:flex;margin-bottom:1.25rem;border-bottom:2px solid #e2e8f0}
+.tab-button{flex:1;padding:.65rem;background:none;border:none;font-size:.95rem;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab-button.active{color:var(--primary);border-bottom-color:var(--primary)}
+.form-group{margin-bottom:1rem}
+label{display:block;font-size:.85rem;font-weight:600;color:var(--text-dark);margin-bottom:.3rem}
+input,select,textarea{width:100%;padding:.65rem;border:1px solid var(--border);border-radius:6px;font-size:.9rem;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+.hint{font-size:.75rem;color:#64748b;margin-top:.25rem}
+.inline-input-group{display:flex;gap:.5rem}
+.inline-btn{padding:.65rem .9rem;background:#475569;color:#fff;border:none;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;background:#f8fafc;padding:.75rem;border-radius:6px;border:1px solid var(--border)}
+.checkbox-label{display:flex;align-items:center;gap:.5rem;font-size:.85rem;cursor:pointer;font-weight:400;margin:0}
+.checkbox-label input{width:auto}
+.btn{width:100%;padding:.75rem;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:.5rem}
+.btn:hover{background:var(--primary-hover)}
+.btn-recruit{background:#059669;margin-top:.75rem;padding:.55rem;font-size:.85rem}
+.btn-recruit:hover{background:#047857}
+.btn-outline{background:transparent;color:#64748b;border:1px solid var(--border);margin-top:.75rem}
+.btn-outline:hover{background:#f8fafc;color:var(--text-dark)}
+.btn-danger{background:#dc2626}.btn-danger:hover{background:#b91c1c}
+.card-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:1rem;margin-bottom:1rem}
+.offer-card{background:#ecfdf5;border:1px solid #a7f3d0;border-left:4px solid #10b981;padding:.9rem;border-radius:6px;margin-bottom:.75rem;font-size:.85rem;color:#065f46}
+.offer-card strong{color:#065f46}
+.offer-card .letter{background:#fff;border:1px dashed #6ee7b7;border-radius:6px;padding:.75rem;margin:.5rem 0;line-height:1.5;color:var(--text)}
+.notif-actions{display:flex;gap:.5rem;margin-top:.5rem}
+.btn-accept,.btn-decline{color:#fff;border:none;padding:.35rem .75rem;border-radius:4px;font-size:.8rem;cursor:pointer;font-weight:600}
+.btn-accept{background:#10b981}.btn-decline{background:#ef4444}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem;gap:.5rem}
+.badge{font-size:.75rem;padding:.2rem .55rem;border-radius:12px;font-weight:700;color:#fff;white-space:nowrap}
+.badge-high{background:#16a34a}.badge-mid{background:#d97706}.badge-low{background:#dc2626}
+.badge-status{background:#475569}
+.company-name{font-size:.85rem;color:#64748b;margin-bottom:.5rem}
+.tag-container{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.tag{font-size:.75rem;padding:.25rem .5rem;border-radius:4px}
+.tag-match{background:#dcfce7;color:#166534;font-weight:600}
+.tag-missing{background:#fee2e2;color:#991b1b}
+.tag-guide{background:#e0f2fe;color:#0369a1;font-weight:600}
+.meter{height:12px;background:#e2e8f0;border-radius:6px;overflow:hidden;margin:.6rem 0}
+.meter>div{height:100%;transition:width .4s}
+.big-pct{font-size:2.2rem;font-weight:700;text-align:center;color:var(--text-dark)}
+.alert-box{margin-top:1rem;padding:.65rem;border-radius:6px;font-size:.85rem;text-align:center;display:none}
+.alert-error{background:#fee2e2;color:var(--danger);border:1px solid #fca5a5}
+.alert-success{background:#dcfce7;color:var(--success);border:1px solid #86efac}
+.empty{text-align:center;color:#64748b;font-size:.85rem;padding:.5rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <button class="back-btn" id="header-back-btn" onclick="goBack()">⬅️ Back</button>
+    <h1>🎓 IndustryConnect Portal</h1>
+  </div>
+  <button class="logout-btn" id="logout-btn" onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+
+<!-- SCREEN 1: Authentication -->
+<div id="screen-auth" class="screen active">
+  <h2>Portal Login & Registration</h2>
+  <p class="subtitle">Access skill mapping, internships, and hiring drives</p>
+  <div class="role-tabs">
+    <button class="role-btn active" id="btn-role-student" onclick="setRole('student')">🎓 Student</button>
+    <button class="role-btn" id="btn-role-recruiter" onclick="setRole('recruiter')">🏢 Recruiter</button>
+  </div>
+  <div class="tab-container">
+    <button class="tab-button active" id="btn-mode-login" onclick="setMode('login')">Log In</button>
+    <button class="tab-button" id="btn-mode-signup" onclick="setMode('signup')">Sign Up</button>
+  </div>
+
+  <form id="form-student-login" onsubmit="handleStudentLogin(event)">
+    <div class="form-group"><label for="stu-login-email">Email ID ✉️</label>
+      <input type="email" id="stu-login-email" placeholder="vrmk@gmail.com" required /></div>
+    <div class="form-group"><label for="stu-login-pass">Password 🔑</label>
+      <input type="password" id="stu-login-pass" placeholder="Enter password" required /></div>
+    <button type="submit" class="btn">Log In as Student</button>
+  </form>
+
+  <form id="form-student-signup" onsubmit="handleStudentSignup(event)" style="display:none">
+    <div class="form-group"><label for="stu-sign-name">User Name 👤</label>
+      <input type="text" id="stu-sign-name" placeholder="Full Name" required /></div>
+    <div class="form-group"><label for="stu-sign-email">Email ID ✉️</label>
+      <input type="email" id="stu-sign-email" placeholder="name@example.com" required /></div>
+    <div class="form-group"><label for="stu-sign-phone">Mobile Number 📱</label>
+      <input type="tel" id="stu-sign-phone" class="phone" placeholder="10-digit number" maxlength="10" inputmode="numeric" required />
+      <div class="hint">Exactly 10 digits, numbers only.</div></div>
+    <div class="form-group"><label for="stu-sign-pass">Create New Password 🔒</label>
+      <input type="password" id="stu-sign-pass" placeholder="Min 6 characters" minlength="6" required /></div>
+    <div class="form-group"><label for="stu-sign-confirm">Confirm Password 🔐</label>
+      <input type="password" id="stu-sign-confirm" placeholder="Re-enter password" required /></div>
+    <button type="submit" class="btn">Create Student Account</button>
+  </form>
+
+  <form id="form-recruiter-login" onsubmit="handleRecruiterLogin(event)" style="display:none">
+    <div class="form-group"><label for="rec-login-email">Work Email ID ✉️</label>
+      <input type="email" id="rec-login-email" placeholder="recruiter@techcorp.com" required /></div>
+    <div class="form-group"><label for="rec-login-pass">Password 🔑</label>
+      <input type="password" id="rec-login-pass" placeholder="Enter password" required /></div>
+    <div class="form-group"><label for="rec-login-phone">Mobile Number 📱</label>
+      <div class="inline-input-group">
+        <input type="tel" id="rec-login-phone" class="phone" placeholder="10-digit number" maxlength="10" inputmode="numeric" required />
+        <button type="button" class="inline-btn" onclick="sendOtp('rec-login')">Send OTP</button>
+      </div></div>
+    <div class="form-group" id="rec-login-otp-group" style="display:none">
+      <label for="rec-login-otp">Enter OTP (Demo: 1234) 🔢</label>
+      <div class="inline-input-group">
+        <input type="text" id="rec-login-otp" placeholder="4-digit OTP" maxlength="4" />
+        <button type="button" class="inline-btn" onclick="verifyOtp('rec-login')">Verify OTP</button>
+      </div></div>
+    <button type="submit" class="btn">Log In as Recruiter</button>
+  </form>
+
+  <form id="form-recruiter-signup" onsubmit="handleRecruiterSignup(event)" style="display:none">
+    <div class="form-group"><label for="rec-sign-name">Company / Recruiter Name 👤</label>
+      <input type="text" id="rec-sign-name" placeholder="TechCorp HR" required /></div>
+    <div class="form-group"><label for="rec-sign-email">Work Email ID ✉️</label>
+      <input type="email" id="rec-sign-email" placeholder="hr@techcorp.com" required /></div>
+    <div class="form-group"><label for="rec-sign-phone">Mobile Number 📱</label>
+      <div class="inline-input-group">
+        <input type="tel" id="rec-sign-phone" class="phone" placeholder="10-digit number" maxlength="10" inputmode="numeric" required />
+        <button type="button" class="inline-btn" onclick="sendOtp('rec-sign')">Send OTP</button>
+      </div></div>
+    <div class="form-group" id="rec-sign-otp-group" style="display:none">
+      <label for="rec-sign-otp">Enter OTP (Demo: 1234) 🔢</label>
+      <div class="inline-input-group">
+        <input type="text" id="rec-sign-otp" placeholder="4-digit OTP" maxlength="4" />
+        <button type="button" class="inline-btn" onclick="verifyOtp('rec-sign')">Verify OTP</button>
+      </div></div>
+    <div class="form-group"><label for="rec-sign-pass">Create New Password 🔒</label>
+      <input type="password" id="rec-sign-pass" placeholder="Min 6 characters" minlength="6" required /></div>
+    <div class="form-group"><label for="rec-sign-confirm">Confirm Password 🔐</label>
+      <input type="password" id="rec-sign-confirm" placeholder="Re-enter password" required /></div>
+    <button type="submit" class="btn">Create Recruiter Account</button>
+  </form>
+  <div id="auth-alert" class="alert-box"></div>
+</div>
+
+<!-- SCREEN 2: Student profile + offer letters -->
+<div id="screen-profile" class="screen">
+  <h2>🎓 Qualifications & Skills</h2>
+  <p class="subtitle" id="profile-welcome">Enter your academic background and certifications</p>
+
+  <div id="student-offers-area" style="display:none;margin-bottom:1.5rem">
+    <h4 style="color:#065f46;margin-bottom:.5rem">📩 Offer Letters</h4>
+    <div id="student-offers-list"></div>
+  </div>
+
+  <form onsubmit="handleProfileSubmit(event)">
+    <div class="form-group"><label for="degree">Highest Qualification 🏫</label>
+      <select id="degree" required>
+        <option value="">-- Select Degree --</option>
+        <option>B.Tech Computer Science</option>
+        <option>B.Tech Electronics & Communication</option>
+        <option>BCA / B.Sc Computer Science</option>
+        <option>MCA / M.Tech</option>
+      </select></div>
+    <div class="form-group"><label for="grad-year">Graduation Year 📅</label>
+      <select id="grad-year" required>
+        <option>2025</option><option>2026</option><option>2027</option><option>2028</option>
+      </select></div>
+    <div class="form-group"><label>Completed Certifications 📜</label>
+      <div class="checkbox-grid" id="profile-certs"></div></div>
+    <button type="submit" class="btn">Save & View Suitable Roles 🚀</button>
+    <button type="button" class="btn btn-outline" onclick="openCheck()">🎯 Check my match for a company role</button>
+    <button type="button" class="btn btn-outline" onclick="goToCompanyGuide()">I don't have certifications ❌</button>
+    <button type="button" class="btn btn-danger" onclick="openDelete()">🗑️ Delete my account</button>
+  </form>
+</div>
+
+<!-- SCREEN 3: Matches -->
+<div id="screen-matches" class="screen">
+  <h2>💼 Recommended Roles</h2>
+  <p class="subtitle">Best matches first, based on your certifications</p>
+  <div id="matches-list"></div>
+  <button class="btn btn-outline" onclick="navigateWithHistory('screen-profile')">✏️ Edit Qualifications</button>
+</div>
+
+<!-- SCREEN 4: Guide -->
+<div id="screen-guide" class="screen">
+  <h2>🏢 Company Certification Requirements</h2>
+  <p class="subtitle">Certifications demanded by hiring partners</p>
+  <div id="guide-list"></div>
+  <button class="btn" onclick="navigateWithHistory('screen-profile')">🔙 Back to Add Certifications</button>
+</div>
+
+<!-- SCREEN 5: Recruiter dashboard -->
+<div id="screen-recruiter-dash" class="screen">
+  <h2>🏢 Recruiter Dashboard</h2>
+  <p class="subtitle" id="rec-welcome">Manage job openings and evaluate student talent</p>
+
+  <div class="card-item">
+    <h4>📢 Post New Job Opening</h4>
+    <p class="company-name">Define company, role type and required certifications</p>
+    <button class="btn" onclick="showJobCreationForm()">➕ Create Job Opening</button>
+  </div>
+
+  <div id="job-creation-box" class="card-item" style="display:none;border:2px solid var(--primary);background:#fff">
+    <h4 style="margin-bottom:.75rem;color:var(--primary)">📝 Enter Job Opening Details</h4>
+    <form onsubmit="handleCreateJob(event)">
+      <div class="form-group"><label for="new-job-company">Company Name 🏢</label>
+        <input type="text" id="new-job-company" placeholder="e.g. Apex Tech Solutions" required /></div>
+      <div class="form-group"><label for="new-job-type">Type of Role 🗂️</label>
+        <select id="new-job-type" required>
+          <option>Internship</option><option>Full-time</option><option>Part-time</option><option>Contract</option>
+        </select></div>
+      <div class="form-group"><label for="new-job-title">Required Role Name 💼</label>
+        <input type="text" id="new-job-title" placeholder="e.g. AI / ML Engineer" required /></div>
+      <div class="form-group"><label>Required Certifications 📜</label>
+        <div class="checkbox-grid" id="job-certs"></div></div>
+      <button type="submit" class="btn">Submit Job Opening 🚀</button>
+    </form>
+  </div>
+
+  <div class="card-item">
+    <h4>👥 Candidate Talent Pool</h4>
+    <p class="company-name">View registered students, match percentage and send offer letters</p>
+    <button class="btn btn-outline" onclick="reviewCandidateMatches()">🔍 Review Candidate Matches</button>
+  </div>
+
+  <div class="card-item">
+    <h4>📨 Offer Letters Sent</h4>
+    <div id="sent-offers-list" style="margin-top:.5rem"></div>
+  </div>
+
+  <button class="btn btn-danger" onclick="openDelete()">🗑️ Delete my account</button>
+</div>
+
+<!-- SCREEN 6: Candidate review -->
+<div id="screen-candidate-matches" class="screen">
+  <h2>🎯 Candidate Suitability Review</h2>
+  <p class="subtitle">Ranked suitability of registered students for posted roles</p>
+  <div class="form-group"><label for="match-role-select">Select Job Role to Evaluate:</label>
+    <select id="match-role-select" onchange="renderCandidateMatches()"></select></div>
+  <div id="candidates-list"></div>
+  <button class="btn btn-outline" onclick="navigateWithHistory('screen-recruiter-dash')">🔙 Back to Recruiter Dashboard</button>
+</div>
+
+<!-- SCREEN 7: Student role match check -->
+<div id="screen-check" class="screen">
+  <h2>🎯 Check Role Match</h2>
+  <p class="subtitle">Pick a company and role, tick your certifications, and see your match</p>
+  <div class="form-group"><label for="check-company">Company 🏢</label>
+    <select id="check-company" onchange="onCompanyChange()"></select></div>
+  <div class="form-group"><label for="check-type">Type of Role 🗂️</label>
+    <select id="check-type" onchange="onTypeChange()"></select></div>
+  <div class="form-group"><label for="check-role">Role 💼</label>
+    <select id="check-role"></select></div>
+  <div class="form-group"><label>Certifications you have 📜</label>
+    <div class="checkbox-grid" id="check-certs"></div></div>
+  <button class="btn" onclick="analyzeRole()">Analyze Match 📊</button>
+  <div id="check-result" style="margin-top:1rem"></div>
+  <button class="btn btn-outline" onclick="navigateWithHistory('screen-profile')">🔙 Back to Profile</button>
+</div>
+
+<!-- SCREEN 8: Offer letter form -->
+<div id="screen-offer" class="screen">
+  <h2>📨 Send Offer Letter</h2>
+  <p class="subtitle" id="offer-subtitle"></p>
+  <form onsubmit="handleSendOffer(event)">
+    <div class="form-group"><label for="offer-pay">Stipend / Salary 💰</label>
+      <input type="text" id="offer-pay" placeholder="e.g. ₹15,000 per month or 6 LPA" required /></div>
+    <div class="form-group"><label for="offer-date">Joining Date 📅</label>
+      <input type="date" id="offer-date" required /></div>
+    <div class="form-group"><label for="offer-location">Work Location 📍</label>
+      <input type="text" id="offer-location" placeholder="e.g. Hyderabad / Remote" required /></div>
+    <div class="form-group"><label for="offer-msg">Message to Student ✍️</label>
+      <textarea id="offer-msg" rows="3" placeholder="We were impressed by your skills..."></textarea></div>
+    <button type="submit" class="btn">Send Offer Letter 🚀</button>
+  </form>
+  <button class="btn btn-outline" onclick="goBack()">🔙 Cancel</button>
+</div>
+
+<!-- SCREEN 9: Delete account -->
+<div id="screen-delete" class="screen">
+  <h2>🗑️ Delete Account</h2>
+  <p class="subtitle" id="delete-subtitle"></p>
+  <form onsubmit="handleDeleteAccount(event)">
+    <div class="form-group"><label for="delete-pass">Enter your password to confirm 🔑</label>
+      <input type="password" id="delete-pass" required /></div>
+    <button type="submit" class="btn btn-danger">Delete my account permanently</button>
+  </form>
+  <button class="btn btn-outline" onclick="goBack()">🔙 Cancel</button>
+</div>
+
+</div>
+
+<script>
+/* ---------- Data & storage ---------- */
+const KEY = 'industryConnectData';
+const CERTS = ["Python","SQL","Power BI","JavaScript","React","AWS Cloud","Docker","Java"];
+
+const defaults = {
+  students: [
+    { name:"Manoj", email:"vrmk@gmail.com", phone:"9876543210", password:"manoj@123", degree:"B.Tech Computer Science", gradYear:"2026", certs:["Python","SQL","Power BI"] },
+    { name:"Rahul Verma", email:"rahul@example.com", phone:"9876500002", password:"123456", degree:"BCA / B.Sc Computer Science", gradYear:"2025", certs:["JavaScript","React"] }
+  ],
+  recruiters: [{ name:"TechCorp HR", email:"recruit@gmail.com", phone:"9876543210", password:"recruit @123" }],
+  jobs: [
+    { role:"Data Analyst Intern", company:"FinTech Corp", type:"Internship", required:["Python","SQL","Power BI"] },
+    { role:"Frontend Developer", company:"Pixel Labs", type:"Full-time", required:["JavaScript","React"] },
+    { role:"Cloud & DevOps Associate", company:"CloudScale Inc", type:"Full-time", required:["AWS Cloud","Docker","Python"] },
+    { role:"Backend Software Engineer", company:"Nexus Tech", type:"Full-time", required:["Java","SQL","Docker"] }
+  ],
+  offers: {},        // { studentEmail: [offer, ...] }
+  session: null      // { role:'student'|'recruiter', email }
+};
+
+function loadData() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && d.students && d.recruiters && d.jobs) { d.offers = d.offers || {}; return d; }
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(defaults));
+}
+function saveData() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { console.warn('Could not save', e); }
+}
+let db = loadData();
+
+let currentRole = 'student', currentMode = 'login';
+let screenHistory = [];
+let pendingOffer = null;
+const otpVerified = { 'rec-login': null, 'rec-sign': null }; // stores the phone that was verified
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const validPhone = p => /^\d{10}$/.test(p);
+const normEmail = e => e.trim().toLowerCase();
+const currentStudent = () => db.students.find(s => s.email === db.session?.email);
+const currentRecruiter = () => db.recruiters.find(r => r.email === db.session?.email);
+const hasAccepted = email => (db.offers[email] || []).some(o => o.status === 'accepted');
+
+function calcMatch(required, certs) {
+  const have = certs.map(c => c.toLowerCase());
+  const matched = required.filter(r => have.includes(r.toLowerCase()));
+  const missing = required.filter(r => !have.includes(r.toLowerCase()));
+  const percentage = required.length ? Math.round(matched.length / required.length * 100) : 0;
+  return { matched, missing, percentage };
+}
+const badgeFor = p => p >= 70 ? 'badge-high' : p >= 40 ? 'badge-mid' : 'badge-low';
+const colorFor = p => p >= 70 ? '#16a34a' : p >= 40 ? '#d97706' : '#dc2626';
+const tagsHtml = (m, x) =>
+  m.map(c => `<span class="tag tag-match">✓ ${esc(c)}</span>`).join('') +
+  x.map(c => `<span class="tag tag-missing">✗ Missing: ${esc(c)}</span>`).join('');
+
+function renderChecks(containerId, name, selected = []) {
+  const have = selected.map(s => s.toLowerCase());
+  $(containerId).innerHTML = CERTS.map(c =>
+    `<label class="checkbox-label"><input type="checkbox" name="${name}" value="${esc(c)}" ${have.includes(c.toLowerCase()) ? 'checked' : ''}/> ${esc(c)}</label>`
+  ).join('');
+}
+const checked = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
+
+/* ---------- Navigation ---------- */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  const auth = id === 'screen-auth';
+  $('logout-btn').style.display = auth ? 'none' : 'block';
+  if (auth) screenHistory = [];
+  $('header-back-btn').style.display = (!auth && screenHistory.length) ? 'inline-block' : 'none';
+
+  if (id === 'screen-profile') {
+    const s = currentStudent();
+    if (s) {
+      $('profile-welcome').textContent = `Welcome, ${s.name}! Your details are saved automatically.`;
+      $('degree').value = s.degree || '';
+      $('grad-year').value = s.gradYear || '2026';
+      renderChecks('profile-certs', 'certs', s.certs);
+    }
+    renderStudentOffers();
+  }
+  if (id === 'screen-recruiter-dash') {
+    const r = currentRecruiter();
+    if (r) $('rec-welcome').textContent = `Welcome, ${r.name}`;
+    renderChecks('job-certs', 'job-req-certs');
+    renderSentOffers();
+  }
+}
+function navigateWithHistory(target) {
+  const active = document.querySelector('.screen.active');
+  if (active && active.id !== target) screenHistory.push(active.id);
+  showScreen(target);
+}
+function goBack() { if (screenHistory.length) showScreen(screenHistory.pop()); }
+
+function setRole(role) {
+  currentRole = role;
+  $('btn-role-student').classList.toggle('active', role === 'student');
+  $('btn-role-recruiter').classList.toggle('active', role === 'recruiter');
+  updateFormVisibility();
+}
+function setMode(mode) {
+  currentMode = mode;
+  $('btn-mode-login').classList.toggle('active', mode === 'login');
+  $('btn-mode-signup').classList.toggle('active', mode === 'signup');
+  updateFormVisibility();
+}
+function updateFormVisibility() {
+  clearAlert();
+  const show = (id, on) => $(id).style.display = on ? 'block' : 'none';
+  show('form-student-login', currentRole === 'student' && currentMode === 'login');
+  show('form-student-signup', currentRole === 'student' && currentMode === 'signup');
+  show('form-recruiter-login', currentRole === 'recruiter' && currentMode === 'login');
+  show('form-recruiter-signup', currentRole === 'recruiter' && currentMode === 'signup');
+}
+function showAlert(text, cls) {
+  const el = $('auth-alert');
+  el.className = `alert-box ${cls}`;
+  el.textContent = text;
+  el.style.display = 'block';
+}
+function clearAlert() { $('auth-alert').style.display = 'none'; }
+
+/* ---------- OTP ---------- */
+function sendOtp(prefix) {
+  const phone = $(`${prefix}-phone`).value.trim();
+  if (!validPhone(phone)) return showAlert('❌ Mobile number must be exactly 10 digits.', 'alert-error');
+  $(`${prefix}-otp-group`).style.display = 'block';
+  showAlert(`📲 OTP sent to ${phone}! (Demo OTP: 1234)`, 'alert-success');
+}
+function verifyOtp(prefix) {
+  const phone = $(`${prefix}-phone`).value.trim();
+  if (!validPhone(phone)) return showAlert('❌ Mobile number must be exactly 10 digits.', 'alert-error');
+  if ($(`${prefix}-otp`).value.trim() === '1234') {
+    otpVerified[prefix] = phone;
+    showAlert('✅ OTP verified successfully!', 'alert-success');
+  } else {
+    otpVerified[prefix] = null;
+    showAlert('❌ Invalid OTP. Enter 1234.', 'alert-error');
+  }
+}
+const isOtpOk = prefix => otpVerified[prefix] && otpVerified[prefix] === $(`${prefix}-phone`).value.trim();
+
+/* ---------- Authentication ---------- */
+function startSession(role, email) {
+  db.session = { role, email };
+  saveData();
+  screenHistory = [];
+  showScreen(role === 'student' ? 'screen-profile' : 'screen-recruiter-dash');
+}
+
+function handleStudentSignup(e) {
+  e.preventDefault();
+  const name = $('stu-sign-name').value.trim();
+  const email = normEmail($('stu-sign-email').value);
+  const phone = $('stu-sign-phone').value.trim();
+  const pass = $('stu-sign-pass').value;
+  if (!validPhone(phone)) return showAlert('❌ Mobile number must be exactly 10 digits.', 'alert-error');
+  if (pass !== $('stu-sign-confirm').value) return showAlert('❌ Passwords do not match.', 'alert-error');
+  if (db.students.some(u => u.email === email)) return showAlert('❌ This email is already registered.', 'alert-error');
+  db.students.push({ name, email, phone, password: pass, degree: '', gradYear: '2026', certs: [] });
+  db.offers[email] = [];
+  saveData();
+  e.target.reset();
+  setMode('login');
+  $('stu-login-email').value = email;
+  showAlert('🎉 Account created and saved! Please log in.', 'alert-success');
+}
+
+function handleStudentLogin(e) {
+  e.preventDefault();
+  const email = normEmail($('stu-login-email').value);
+  const user = db.students.find(u => u.email === email && u.password === $('stu-login-pass').value);
+  if (!user) return showAlert('❌ Incorrect email or password.', 'alert-error');
+  startSession('student', user.email);
+}
+
+function handleRecruiterSignup(e) {
+  e.preventDefault();
+  const name = $('rec-sign-name').value.trim();
+  const email = normEmail($('rec-sign-email').value);
+  const phone = $('rec-sign-phone').value.trim();
+  const pass = $('rec-sign-pass').value;
+  if (!validPhone(phone)) return showAlert('❌ Mobile number must be exactly 10 digits.', 'alert-error');
+  if (pass !== $('rec-sign-confirm').value) return showAlert('❌ Passwords do not match.', 'alert-error');
+  if (db.recruiters.some(u => u.email === email)) return showAlert('❌ This email is already registered.', 'alert-error');
+  if (!isOtpOk('rec-sign')) return showAlert('❌ Please send and verify OTP for this number.', 'alert-error');
+  db.recruiters.push({ name, email, phone, password: pass });
+  saveData();
+  e.target.reset();
+  otpVerified['rec-sign'] = null;
+  $('rec-sign-otp-group').style.display = 'none';
+  setMode('login');
+  $('rec-login-email').value = email;
+  showAlert('🎉 Recruiter account created and saved! Please log in.', 'alert-success');
+}
+
+function handleRecruiterLogin(e) {
+  e.preventDefault();
+  const email = normEmail($('rec-login-email').value);
+  const user = db.recruiters.find(u => u.email === email && u.password === $('rec-login-pass').value);
+  if (!user) return showAlert('❌ Incorrect email or password.', 'alert-error');
+  if (!validPhone($('rec-login-phone').value.trim())) return showAlert('❌ Mobile number must be exactly 10 digits.', 'alert-error');
+  if (!isOtpOk('rec-login')) return showAlert('❌ Please send and verify OTP for this number.', 'alert-error');
+  startSession('recruiter', user.email);
+}
+
+function logout() {
+  db.session = null;
+  saveData();
+  otpVerified['rec-login'] = otpVerified['rec-sign'] = null;
+  document.querySelectorAll('form').forEach(f => f.reset());
+  ['rec-login-otp-group', 'rec-sign-otp-group'].forEach(id => $(id).style.display = 'none');
+  showScreen('screen-auth');
+}
+
+/* ---------- Student: profile, matches, guide ---------- */
+function handleProfileSubmit(e) {
+  e.preventDefault();
+  const selected = checked('certs');
+  if (!selected.length) return alert("Please select certifications or click 'I don't have certifications'.");
+  const s = currentStudent();
+  s.certs = selected;
+  s.degree = $('degree').value;
+  s.gradYear = $('grad-year').value;
+  saveData();
+  renderStudentMatches(selected);
+  navigateWithHistory('screen-matches');
+}
+
+function renderStudentMatches(userCerts) {
+  const list = $('matches-list');
+  list.innerHTML = '';
+  db.jobs
+    .map((job, idx) => ({ job, idx, ...calcMatch(job.required, userCerts) }))
+    .sort((a, b) => b.percentage - a.percentage)
+    .forEach(({ job, idx, matched, missing, percentage }) => {
+      const card = document.createElement('div');
+      card.className = 'card-item';
+      card.innerHTML = `
+        <div class="card-header"><h4>${esc(job.role)}</h4><span class="badge ${badgeFor(percentage)}">${percentage}% Match</span></div>
+        <p class="company-name">🏢 ${esc(job.company)} • 🗂️ ${esc(job.type || 'Role')}</p>
+        <div class="tag-container">${tagsHtml(matched, missing)}</div>
+        <button class="btn btn-recruit" style="background:#2563eb" onclick="applyJob(${idx})">Apply Now 🚀</button>`;
+      list.appendChild(card);
+    });
+}
+function applyJob(idx) {
+  const j = db.jobs[idx];
+  if (j) alert(`Applied successfully for ${j.role} at ${j.company}! 🎉`);
+}
+
+function goToCompanyGuide() {
+  const list = $('guide-list');
+  list.innerHTML = '';
+  db.jobs.forEach(job => {
+    const card = document.createElement('div');
+    card.className = 'card-item';
+    card.innerHTML = `
+      <div class="card-header"><h4>${esc(job.role)}</h4></div>
+      <p class="company-name">🏢 ${esc(job.company)} • 🗂️ ${esc(job.type || 'Role')}</p>
+      <div class="tag-container">${job.required.map(c => `<span class="tag tag-guide">📜 ${esc(c)}</span>`).join('')}</div>`;
+    list.appendChild(card);
+  });
+  navigateWithHistory('screen-guide');
+}
+
+/* ---------- Student: company > role type > role analysis ---------- */
+function fillSelect(id, items, emptyText) {
+  $(id).innerHTML = items.length
+    ? items.map(i => `<option value="${esc(i.value)}">${esc(i.label)}</option>`).join('')
+    : `<option value="">${esc(emptyText)}</option>`;
+}
+function openCheck() {
+  const companies = [...new Set(db.jobs.map(j => j.company))];
+  fillSelect('check-company', companies.map(c => ({ value: c, label: c })), 'No companies yet');
+  renderChecks('check-certs', 'check-certs', currentStudent()?.certs || []);
+  $('check-result').innerHTML = '';
+  onCompanyChange();
+  navigateWithHistory('screen-check');
+}
+function onCompanyChange() {
+  const company = $('check-company').value;
+  const types = [...new Set(db.jobs.filter(j => j.company === company).map(j => j.type || 'Role'))];
+  fillSelect('check-type', types.map(t => ({ value: t, label: t })), 'No role types');
+  onTypeChange();
+}
+function onTypeChange() {
+  const company = $('check-company').value, type = $('check-type').value;
+  const roles = db.jobs
+    .map((j, idx) => ({ j, idx }))
+    .filter(({ j }) => j.company === company && (j.type || 'Role') === type)
+    .map(({ j, idx }) => ({ value: idx, label: j.role }));
+  fillSelect('check-role', roles, 'No roles available');
+  $('check-result').innerHTML = '';
+}
+function analyzeRole() {
+  const idx = $('check-role').value;
+  const job = db.jobs[idx];
+  if (!job) return alert('Please select a company, role type and role.');
+  const { matched, missing, percentage } = calcMatch(job.required, checked('check-certs'));
+  const verdict = percentage >= 70 ? '✅ Strong match, you can apply!'
+    : percentage >= 40 ? '⚠️ Partial match, build the missing skills.'
+    : '❌ Low match, focus on the missing certifications.';
+  $('check-result').innerHTML = `
+    <div class="card-item">
+      <div class="card-header"><h4>${esc(job.role)}</h4><span class="badge ${badgeFor(percentage)}">${esc(job.type || 'Role')}</span></div>
+      <p class="company-name">🏢 ${esc(job.company)}</p>
+      <div class="big-pct" style="color:${colorFor(percentage)}">${percentage}%</div>
+      <div class="meter"><div style="width:${percentage}%;background:${colorFor(percentage)}"></div></div>
+      <p style="text-align:center;font-size:.85rem;margin-bottom:.5rem">${verdict}</p>
+      <div class="tag-container">${tagsHtml(matched, missing)}</div>
+    </div>`;
+}
+
+/* ---------- Student: offer letters ---------- */
+function renderStudentOffers() {
+  const s = currentStudent();
+  const offers = (s && db.offers[s.email]) || [];
+  $('student-offers-area').style.display = offers.length ? 'block' : 'none';
+  const list = $('student-offers-list');
+  list.innerHTML = '';
+  offers.slice().reverse().forEach(o => {
+    const div = document.createElement('div');
+    div.className = 'offer-card';
+    div.innerHTML = `
+      <strong>📩 Offer from ${esc(o.company)}</strong>
+      <div class="letter">
+        Dear ${esc(s.name)},<br><br>
+        We are pleased to offer you the position of <strong>${esc(o.role)}</strong> (${esc(o.type)}) at <strong>${esc(o.company)}</strong>.<br>
+        • Stipend / Salary: <strong>${esc(o.pay)}</strong><br>
+        • Joining date: <strong>${esc(o.joinDate)}</strong><br>
+        • Location: <strong>${esc(o.location)}</strong><br>
+        ${o.message ? `<br>${esc(o.message)}<br>` : ''}
+        <br>Regards,<br>${esc(o.recruiterName)}<br><small>Sent ${esc(o.time)}</small>
+      </div>
+      <div class="notif-actions">
+        ${o.status === 'pending'
+          ? `<button class="btn-accept" onclick="respondOffer(${o.id}, 'accepted')">Accept Offer 🤝</button>
+             <button class="btn-decline" onclick="respondOffer(${o.id}, 'declined')">Decline</button>`
+          : o.status === 'closed'
+            ? `<span style="font-weight:600;color:#64748b">Closed: you already accepted another offer</span>`
+            : `<span style="font-weight:600;color:${o.status === 'accepted' ? '#059669' : '#dc2626'}">Status: ${esc(o.status.toUpperCase())}</span>`}
+      </div>`;
+    list.appendChild(div);
+  });
+}
+function respondOffer(id, action) {
+  const s = currentStudent();
+  const offers = db.offers[s.email] || [];
+  const o = offers.find(x => x.id === id);
+  if (!o || o.status !== 'pending') return;
+  if (action === 'accepted') {
+    if (hasAccepted(s.email)) return alert('You have already accepted an offer. Only one offer can be accepted.');
+    if (!confirm(`Accept the offer from ${o.company}? You can accept only one offer, and your other pending offers will be closed.`)) return;
+    o.status = 'accepted';
+    offers.forEach(x => { if (x !== o && x.status === 'pending') x.status = 'closed'; });
+  } else {
+    o.status = 'declined';
+  }
+  saveData();
+  alert(`You have ${action} the offer! 🎉`);
+  renderStudentOffers();
+}
+
+/* ---------- Recruiter ---------- */
+function showJobCreationForm() {
+  const box = $('job-creation-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+function handleCreateJob(e) {
+  e.preventDefault();
+  const required = checked('job-req-certs');
+  if (!required.length) return alert('Please check at least one required certification.');
+  db.jobs.push({
+    role: $('new-job-title').value.trim(),
+    company: $('new-job-company').value.trim(),
+    type: $('new-job-type').value,
+    required
+  });
+  saveData();
+  alert('New job opening added and saved! ✅');
+  e.target.reset();
+  renderChecks('job-certs', 'job-req-certs');
+  $('job-creation-box').style.display = 'none';
+}
+
+function reviewCandidateMatches() {
+  fillSelect('match-role-select',
+    db.jobs.map((j, i) => ({ value: i, label: `${j.role} (${j.company}, ${j.type || 'Role'})` })),
+    'No jobs posted');
+  renderCandidateMatches();
+  navigateWithHistory('screen-candidate-matches');
+}
+function renderCandidateMatches() {
+  const idx = $('match-role-select').value;
+  const job = db.jobs[idx];
+  const list = $('candidates-list');
+  list.innerHTML = '';
+  if (!job) return;
+  db.students
+    .map(c => ({ c, ...calcMatch(job.required, c.certs) }))
+    .sort((a, b) => b.percentage - a.percentage)
+    .forEach(({ c, matched, missing, percentage }) => {
+      const sent = (db.offers[c.email] || []).some(o => o.role === job.role && o.company === job.company);
+      const taken = hasAccepted(c.email);
+      const card = document.createElement('div');
+      card.className = 'card-item';
+      card.innerHTML = `
+        <div class="card-header"><h4>👤 ${esc(c.name)}</h4><span class="badge ${badgeFor(percentage)}">${percentage}% Suitable</span></div>
+        <p class="company-name">🎓 ${esc(c.degree || 'Degree not added')} • ✉️ ${esc(c.email)}</p>
+        <div class="tag-container">${tagsHtml(matched, missing)}</div>
+        <button class="btn btn-recruit" ${sent || taken ? 'disabled style="opacity:.6;cursor:default"' : ''}
+          data-email="${esc(c.email)}" onclick="openOfferForm(this.dataset.email, ${idx})">
+          ${taken ? '🔒 Already accepted another offer' : sent ? '✅ Offer Letter Sent' : '📨 Send Offer Letter'}
+        </button>`;
+      list.appendChild(card);
+    });
+}
+
+function openOfferForm(email, jobIdx) {
+  const s = db.students.find(u => u.email === email), job = db.jobs[jobIdx];
+  if (!s || !job) return;
+  pendingOffer = { email, jobIdx };
+  $('offer-subtitle').textContent = `To ${s.name} for ${job.role} at ${job.company}`;
+  $('offer-date').min = new Date().toISOString().split('T')[0];
+  navigateWithHistory('screen-offer');
+}
+function handleSendOffer(e) {
+  e.preventDefault();
+  if (!pendingOffer) return;
+  const job = db.jobs[pendingOffer.jobIdx], s = db.students.find(u => u.email === pendingOffer.email);
+  const rec = currentRecruiter();
+  if (hasAccepted(s.email)) { alert(`${s.name} has already accepted another offer.`); pendingOffer = null; goBack(); renderCandidateMatches(); return; }
+  (db.offers[s.email] ||= []).push({
+    id: Date.now(),
+    role: job.role, company: job.company, type: job.type || 'Role',
+    pay: $('offer-pay').value.trim(),
+    joinDate: $('offer-date').value,
+    location: $('offer-location').value.trim(),
+    message: $('offer-msg').value.trim(),
+    recruiterEmail: rec?.email, recruiterName: rec?.name || 'Recruiter',
+    time: new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
+    status: 'pending'
+  });
+  saveData();
+  alert(`Offer letter sent to ${s.name}! 🚀`);
+  e.target.reset();
+  pendingOffer = null;
+  goBack();
+  renderCandidateMatches();
+}
+
+function renderSentOffers() {
+  const rec = currentRecruiter();
+  const list = $('sent-offers-list');
+  const rows = [];
+  db.students.forEach(s => (db.offers[s.email] || []).forEach(o => {
+    if (o.recruiterEmail === rec?.email) rows.push({ s, o });
+  }));
+  list.innerHTML = rows.length ? rows.map(({ s, o }) => `
+    <div class="card-item" style="margin-bottom:.5rem">
+      <div class="card-header"><strong>${esc(s.name)}</strong><span class="badge badge-status">${esc(o.status.toUpperCase())}</span></div>
+      <p class="company-name" style="margin:0">${esc(o.role)} at ${esc(o.company)} • ${esc(o.time)}</p>
+    </div>`).join('') : '<p class="empty">No offer letters sent yet.</p>';
+}
+
+/* ---------- Delete account ---------- */
+function openDelete() {
+  $('delete-subtitle').textContent = db.session.role === 'student'
+    ? 'This permanently removes your profile and all your offer letters.'
+    : 'This permanently removes your recruiter account and withdraws your pending offers.';
+  $('delete-pass').value = '';
+  navigateWithHistory('screen-delete');
+}
+function handleDeleteAccount(e) {
+  e.preventDefault();
+  const { role, email } = db.session;
+  const user = role === 'student' ? currentStudent() : currentRecruiter();
+  if (!user || user.password !== $('delete-pass').value) return alert('❌ Incorrect password. Account not deleted.');
+  if (!confirm('Are you sure? This cannot be undone.')) return;
+  if (role === 'student') {
+    db.students = db.students.filter(x => x.email !== email);
+    delete db.offers[email];
+  } else {
+    db.recruiters = db.recruiters.filter(x => x.email !== email);
+    Object.keys(db.offers).forEach(k => {
+      db.offers[k] = db.offers[k].filter(o => !(o.recruiterEmail === email && o.status === 'pending'));
+    });
+  }
+  saveData();
+  logout();
+  showAlert('🗑️ Your account has been deleted.', 'alert-success');
+}
+
+/* ---------- Start up ---------- */
+document.querySelectorAll('input.phone').forEach(inp =>
+  inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D/g, '').slice(0, 10); }));
+['rec-login', 'rec-sign'].forEach(p =>
+  $(`${p}-phone`).addEventListener('input', () => { otpVerified[p] = null; }));
+
+// Restore the saved login after a page refresh
+(function restoreSession() {
+  const s = db.session;
+  if (s && s.role === 'student' && currentStudent()) showScreen('screen-profile');
+  else if (s && s.role === 'recruiter' && currentRecruiter()) showScreen('screen-recruiter-dash');
+  else { db.session = null; showScreen('screen-auth'); }
+})();
+</script>
+</body>
+</html>
